@@ -1,0 +1,33 @@
+name: Clear all Github actions caches on thursday 
+
+on:
+  schedule:
+    - cron: "0 0 * * 0" # Every Sunday at midnight
+  workflow_dispatch:   # Allows manual trigger
+
+jobs:
+  clear-cache:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write # Necessary to delete caches
+    steps:
+      - name: Clear caches
+        shell: bash
+        run: |
+          echo "Fetching list of caches..."
+          cacheKeysForRepo=$(gh cache list --limit 100 --json key --jq '.[].key')
+
+          ## Check if there are any caches to delete
+          if [ -z "$cacheKeysForRepo" ]; then
+            echo "No caches found."
+          else
+            echo "Deleting caches..."
+            for cacheKey in $cacheKeysForRepo
+            do
+                gh cache delete "$cacheKey"
+            done
+            echo "Done."
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
