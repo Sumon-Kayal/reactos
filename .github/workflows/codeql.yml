@@ -11,6 +11,7 @@ jobs:
   analyze:
     name: Analyze (cpp)
     runs-on: ubuntu-22.04
+    timeout-minutes: 120
     permissions:
       actions: read
       contents: read
@@ -30,7 +31,7 @@ jobs:
       id: get_rosbe_spec
       run: |
         echo march-sha=$(gcc -march=native -Q --help=target | sha1sum | awk '{print $1}') >> $GITHUB_OUTPUT
-        echo git-sha=$(git ls-remote https://github.com/zefklop/RosBE.git | grep unix_amd64 | awk '{print $1}') >> $GITHUB_OUTPUT
+        echo git-sha=$(git ls-remote https://github.com/zefklop/RosBE.git | grep unix_amd64 | head -n1 | awk '{print $1}') >> $GITHUB_OUTPUT
         curl -fsSLo build_rosbe_ci.sh https://gist.githubusercontent.com/zefklop/b2d6a0b470c70183e93d5285a03f5899/raw/e583d55a89e7644780719695acb38cc9f7fd4759/build_rosbe_ci.sh
         echo 'ea42b032fdf9b8b51e993ebe0d1aedc8714f7eff522f4a2fbac7b9aa32a9263c  build_rosbe_ci.sh' | sha256sum -c -
 
@@ -48,7 +49,9 @@ jobs:
         ./build_rosbe_ci.sh ${{github.workspace}}/RosBE-CI
 
     - name: Install ccache
-      run: sudo apt install ccache
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ccache
 
     # build-mode: manual because ReactOS's CMake+RosBE toolchain can't be
     # auto-detected by CodeQL's autobuilder (custom toolchain files, Ninja
@@ -69,4 +72,3 @@ jobs:
       uses: github/codeql-action/analyze@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
       with:
         category: "/language:cpp"
-        
