@@ -30,8 +30,16 @@ jobs:
     - name: Get RosBE build specifics
       id: get_rosbe_spec
       run: |
-        echo march-sha=$(gcc -march=native -Q --help=target | sha1sum | awk '{print $1}') >> $GITHUB_OUTPUT
-        echo git-sha=$(git ls-remote https://github.com/zefklop/RosBE.git | grep unix_amd64 | head -n1 | awk '{print $1}') >> $GITHUB_OUTPUT
+      - name: Get RosBE build specifics
+        id: get_rosbe_spec
+        run: |
+          set -o pipefail
+          echo march-sha=$(gcc -march=native -Q --help=target | sha1sum | awk '{print $1}') >> $GITHUB_OUTPUT
+          rosbe_git_sha="$(git ls-remote https://github.com/zefklop/RosBE.git | grep unix_amd64 | head -n1 | awk '{print $1}')"
+          if [ -z "$rosbe_git_sha" ]; then echo "Error: Could not resolve RosBE unix_amd64 SHA" >&2; exit 1; fi
+          echo "git-sha=$rosbe_git_sha" >> "$GITHUB_OUTPUT"
+          curl -fsSLo build_rosbe_ci.sh https://gist.githubusercontent.com/zefklop/b2d6a0b470c70183e93d5285a03f5899/raw/e583d55a89e7644780719695acb38cc9f7fd4759/build_rosbe_ci.sh
+          echo 'ea42b032fdf9b8b51e993ebe0d1aedc8714f7eff522f4a2fbac7b9aa32a9263c  build_rosbe_ci.sh' | sha256sum -c -
         curl -fsSLo build_rosbe_ci.sh https://gist.githubusercontent.com/zefklop/b2d6a0b470c70183e93d5285a03f5899/raw/e583d55a89e7644780719695acb38cc9f7fd4759/build_rosbe_ci.sh
         echo 'ea42b032fdf9b8b51e993ebe0d1aedc8714f7eff522f4a2fbac7b9aa32a9263c  build_rosbe_ci.sh' | sha256sum -c -
 
