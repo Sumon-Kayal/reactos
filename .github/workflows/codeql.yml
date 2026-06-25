@@ -35,7 +35,7 @@ jobs:
 
     - name: Get RosBE
       id: get_rosbe
-      uses: actions/cache@v4
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: RosBE-CI
         key: RosBE-CI-${{ runner.os }}-${{ steps.get_rosbe_spec.outputs.march-sha }}-${{ steps.get_rosbe_spec.outputs.git-sha }}-${{ hashFiles('./build_rosbe_ci.sh') }}
@@ -52,7 +52,7 @@ jobs:
         sudo apt install -y ccache ninja-build
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
+      uses: github/codeql-action/init@181d5eefc20863364f96762470ba6f862bdef56b # v3.29.2
       with:
         languages: cpp
         build-mode: manual
@@ -66,6 +66,6 @@ jobs:
         echo 'cmake --build ${{ github.workspace }}/build -- -k0' | ${{ github.workspace }}/RosBE-CI/RosBE.sh . 0 amd64
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+      uses: github/codeql-action/analyze@181d5eefc20863364f96762470ba6f862bdef56b # v3.29.2
       with:
         category: "/language:cpp"
