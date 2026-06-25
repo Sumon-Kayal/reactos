@@ -10,8 +10,8 @@ on:
 jobs:
   analyze:
     name: Analyze (cpp)
-    runs-on: ubuntu-22.04
-    timeout-minutes: 120
+    # Using ubuntu-latest ensures it always runs on the newest LTS (currently 22.04 or 24.04)
+    runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
@@ -19,64 +19,53 @@ jobs:
 
     steps:
     - name: Source checkout
-      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      uses: actions/checkout@v4
       with:
         path: src
         persist-credentials: false
 
-    # --- Same RosBE bootstrap as build.yml's build-linux job, trimmed to a
-    # single representative config (gcc / amd64 / Release / NT6). CodeQL needs
-    # one real compile to trace, not the full build matrix. ---
     - name: Get RosBE build specifics
       id: get_rosbe_spec
       run: |
-      - name: Get RosBE build specifics
-        id: get_rosbe_spec
-        run: |
-          set -o pipefail
-          echo march-sha=$(gcc -march=native -Q --help=target | sha1sum | awk '{print $1}') >> $GITHUB_OUTPUT
-          rosbe_git_sha="$(git ls-remote https://github.com/zefklop/RosBE.git | grep unix_amd64 | head -n1 | awk '{print $1}')"
-          if [ -z "$rosbe_git_sha" ]; then echo "Error: Could not resolve RosBE unix_amd64 SHA" >&2; exit 1; fi
-          echo "git-sha=$rosbe_git_sha" >> "$GITHUB_OUTPUT"
-          curl -fsSLo build_rosbe_ci.sh https://gist.githubusercontent.com/zefklop/b2d6a0b470c70183e93d5285a03f5899/raw/e583d55a89e7644780719695acb38cc9f7fd4759/build_rosbe_ci.sh
-          echo 'ea42b032fdf9b8b51e993ebe0d1aedc8714f7eff522f4a2fbac7b9aa32a9263c  build_rosbe_ci.sh' | sha256sum -c -
+        # Use standard tools available on all Ubuntu LTS versions
+        echo "march-sha=$(gcc -march=native -Q --help=target | sha1sum | awk '{print $1}')" >> $GITHUB_OUTPUT
+        echo "git-sha=$(git ls-remote https://github.com/zefklop/RosBE.git | grep unix_amd64 | awk '{print $1}')" >> $GITHUB_OUTPUT
         curl -fsSLo build_rosbe_ci.sh https://gist.githubusercontent.com/zefklop/b2d6a0b470c70183e93d5285a03f5899/raw/e583d55a89e7644780719695acb38cc9f7fd4759/build_rosbe_ci.sh
         echo 'ea42b032fdf9b8b51e993ebe0d1aedc8714f7eff522f4a2fbac7b9aa32a9263c  build_rosbe_ci.sh' | sha256sum -c -
 
     - name: Get RosBE
       id: get_rosbe
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache@v4
       with:
         path: RosBE-CI
-        key: RosBE-CI-${{runner.os}}-${{steps.get_rosbe_spec.outputs.march-sha}}-${{steps.get_rosbe_spec.outputs.git-sha}}-${{hashfiles('./build_rosbe_ci.sh')}}
+        key: RosBE-CI-${{ runner.os }}-${{ steps.get_rosbe_spec.outputs.march-sha }}-${{ steps.get_rosbe_spec.outputs.git-sha }}-${{ hashFiles('./build_rosbe_ci.sh') }}
 
     - name: Compile RosBE
-      if: ${{ steps.get_rosbe.outputs.cache-hit != 'true' }}
+      if: steps.get_rosbe.outputs.cache-hit != 'true'
       run: |
         chmod +x build_rosbe_ci.sh
-        ./build_rosbe_ci.sh ${{github.workspace}}/RosBE-CI
+        ./build_rosbe_ci.sh ${{ github.workspace }}/RosBE-CI
 
-    - name: Install ccache
+    - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y ccache
+        sudo apt update
+        sudo apt install -y ccache ninja-build
 
-    # build-mode: manual because ReactOS's CMake+RosBE toolchain can't be
-    # auto-detected by CodeQL's autobuilder (custom toolchain files, Ninja
-    # generator invoked through RosBE.sh rather than directly).
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
+      uses: github/codeql-action/init@v3
       with:
         languages: cpp
         build-mode: manual
 
     - name: Configure
-      run: echo 'cmake -S ${{github.workspace}}/src -B ${{github.workspace}}/build -G Ninja -DCMAKE_TOOLCHAIN_FILE:FILEPATH=toolchain-gcc.cmake -DARCH:STRING=amd64 -DCMAKE_BUILD_TYPE=Release -DDLL_EXPORT_VERSION=0x600 -DENABLE_CCACHE=1' | ${{github.workspace}}/RosBE-CI/RosBE.sh . 0 amd64
+      run: |
+        echo 'cmake -S ${{ github.workspace }}/src -B ${{ github.workspace }}/build -G Ninja -DCMAKE_TOOLCHAIN_FILE:FILEPATH=toolchain-gcc.cmake -DARCH:STRING=amd64 -DCMAKE_BUILD_TYPE=Release -DDLL_EXPORT_VERSION=0x600 -DENABLE_CCACHE=1' | ${{ github.workspace }}/RosBE-CI/RosBE.sh . 0 amd64
 
     - name: Build
-      run: echo 'cmake --build ${{github.workspace}}/build -- -k0' | ${{github.workspace}}/RosBE-CI/RosBE.sh . 0 amd64
+      run: |
+        echo 'cmake --build ${{ github.workspace }}/build -- -k0' | ${{ github.workspace }}/RosBE-CI/RosBE.sh . 0 amd64
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
+      uses: github/codeql-action/analyze@v3
       with:
         category: "/language:cpp"
