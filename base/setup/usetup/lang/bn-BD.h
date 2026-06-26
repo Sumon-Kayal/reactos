@@ -2293,10 +2293,10 @@ MUI_STRING bnBDStrings[] =
     "ধরন 0x%02x"},
     {STRING_HDDINFO1,
     // "হার্ডডিস্ক %lu (%I64u %s), পোর্ট=%hu, বাস=%hu, আইডি=%hu (%wZ) [%s]"
-    "%I64u %s হার্ডডিস্ক %lu (পোর্ট=%hu, বাস=%hu, আইডি=%hu) %wZ-এ [%s]"},
+    "হার্ডডিস্ক %lu (%I64u %s), পোর্ট=%hu, বাস=%hu, আইডি=%hu (%wZ) [%s]"},
     {STRING_HDDINFO2,
     // "হার্ডডিস্ক %lu (%I64u %s), পোর্ট=%hu, বাস=%hu, আইডি=%hu [%s]"
-    "%I64u %s হার্ডডিস্ক %lu (পোর্ট=%hu, বাস=%hu, আইডি=%hu) [%s]"},
+    "হার্ডডিস্ক %lu (%I64u %s), পোর্ট=%hu, বাস=%hu, আইডি=%hu [%s]"},
     {STRING_UNPSPACE,
     "পার্টিশনহীন স্থান"},
     {STRING_MAXSIZE,

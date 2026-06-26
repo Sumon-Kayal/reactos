@@ -65,9 +65,9 @@
 #ifdef LANGUAGE_BN_BD
     #include "lang/bn-BD.h"
 #endif
-// #ifdef LANGUAGE_BN_IN
-    // #include "lang/bn-IN.h"
-// #endif
+#ifdef LANGUAGE_BN_IN
+    #include "lang/bn-IN.h"
+#endif
 // #ifdef LANGUAGE_CA_ES
     // #include "lang/ca-ES.h"
 // #endif
@@ -242,9 +242,9 @@
 #ifdef LANGUAGE_HE_IL
     #include "lang/he-IL.h"
 #endif
-// #ifdef LANGUAGE_HI_IN
-    // #include "lang/hi-IN.h"
-// #endif
+#ifdef LANGUAGE_HI_IN
+    #include "lang/hi-IN.h"
+#endif
 #ifdef LANGUAGE_HR_HR
     #include "lang/hr-HR.h"
 #endif
@@ -553,7 +553,7 @@ const MUI_LANGUAGE_RESOURCE ResourceList[] =
     {L"00001809", L"English (Ireland)", enUSPages, enUSErrorEntries, enUSStrings},
 #endif
 #ifdef LANGUAGE_EN_IN
-    {L"00001809", L"English (India)", enINPages, enINErrorEntries, enINStrings},
+    {L"00004009", L"English (India)", enINPages, enINErrorEntries, enINStrings},
 #endif
 #ifdef LANGUAGE_EN_ZA
     {L"00001C09", L"English (South Africa)", enUSPages, enUSErrorEntries, enUSStrings},
