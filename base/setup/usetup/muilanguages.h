@@ -62,9 +62,9 @@
 #ifdef LANGUAGE_BG_BG
     #include "lang/bg-BG.h"
 #endif
-// #endif LANGUAGE_BN_BD
-    // #include "lang/bn-BD.h"
-// #endif
+`#ifdef` LANGUAGE_BN_BD
+    `#include` "lang/bn-BD.h"
+`#endif`
 // #ifdef LANGUAGE_BN_IN
     // #include "lang/bn-IN.h"
 // #endif
