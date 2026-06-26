@@ -116,9 +116,9 @@
 // #ifdef LANGUAGE_EN_IE
     // #include "lang/en-IE.h"
 // #endif
-// #ifdef LANGUAGE_EN_IN
-    // #include "lang/en-IN.h"
-// #endif
+`#ifdef` LANGUAGE_EN_IN
+    `#include` "lang/en-IN.h"
+`#endif`
 // #ifdef LANGUAGE_EN_JM
     // #include "lang/en-JM.h"
 // #endif
